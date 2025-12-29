@@ -3,3 +3,6 @@ dash.binblob:dash.c
 
 run:dash.binblob
 	./dash.binblob
+
+clean:
+	gio trash dash.binblob
