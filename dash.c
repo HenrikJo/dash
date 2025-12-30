@@ -2,7 +2,7 @@
 #include <math.h>
 #include <stdio.h>
 
-#define debug 1
+#define debug 0
 
 struct rpm_torque {
     float rpm;
@@ -29,7 +29,10 @@ float gear_ratio_yamaha_fjr_1300[] = { 2.5, 1.722, 1.35, 1.111, 0.962, 0.846 };
 struct vehicle_info {
     unsigned int gears;
     float *gear_ratio;
+
+    unsigned int speed_torque_values;
     struct rpm_torque *torque_at_rpm;
+
     float wheel_diameter;
     float rotor_mass;
     float body_mass;
@@ -41,7 +44,7 @@ float torque_at_rpm(struct vehicle_info *self, float rpm)
     /* Find closest rpm */
     struct rpm_torque *rpm_tq_pnt = self->torque_at_rpm;
     struct rpm_torque *prior_pnt = NULL;
-    while (rpm_tq_pnt != NULL) {
+    for (unsigned int i = 0; i < self->speed_torque_values; i++) {
         if (rpm_tq_pnt->rpm > rpm) {
             /* Found greater rpm, check if prior value exists and where between the torque should be located */
             if (prior_pnt == NULL) {
@@ -84,6 +87,8 @@ int main(void)
     struct vehicle_info yamaha_fjr_1300;
     yamaha_fjr_1300.gears = sizeof(gear_ratio_yamaha_fjr_1300) / sizeof(float);
     yamaha_fjr_1300.gear_ratio = gear_ratio_yamaha_fjr_1300;
+
+    yamaha_fjr_1300.speed_torque_values = sizeof(rpm_torque_yamaha_fjr_1300) / sizeof(rpm_torque_yamaha_fjr_1300[0]);
     yamaha_fjr_1300.torque_at_rpm = rpm_torque_yamaha_fjr_1300;
 
     printf("Gears: %d\n", yamaha_fjr_1300.gears);
