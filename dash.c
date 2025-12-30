@@ -24,7 +24,7 @@ struct rpm_torque rpm_torque_yamaha_fjr_1300[] = {
     { .rpm = 9500, .torque = 0 }
 };
 
-float gear_ratio_yamaha_fjr_1300[] = { 2.5, 1.722, 1.35, 1.111, 0.962, 0.846 };
+float gear_ratio_yamaha_fjr_1300[] = { 2.5f, 1.722f, 1.35f, 1.111f, 0.962f, 0.846f };
 
 struct vehicle_info {
     unsigned int gears;
