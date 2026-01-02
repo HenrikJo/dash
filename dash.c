@@ -35,18 +35,23 @@ struct vehicle_info {
     unsigned int speed_torque_values;
     struct rpm_torque *torque_at_rpm;
 
-    float wheel_diameter;
+    /* Engine specific */
     float rotor_mass;
-    float body_mass;
+    float rotor_drag_torque;
 
+    /* Vehicle specific */
+    float wheel_diameter;
+    float body_mass;
     float wind_coefficient;
 
     /* Dynamic state */
     float engine_rpm;
     float vehicle_speed;
 
-    float throttle;
+    float throttle; /* 0 -> 1 for 0% -> 100% of available torque */
     float brake;
+
+    unsigned int clutch_engaged; /* Is the clutch engaged, 0 for disengaged and 1 for engaged */
 };
 
 float torque_at_rpm(struct vehicle_info *self, float rpm)
@@ -105,6 +110,32 @@ float rpm_to_rev(float rpm, unsigned int gear)
     return 0.0f;
 }
 
+float calculate_acceleration(float torque, float mass, float deltatime)
+{
+    float acceleration = (torque / mass) * deltatime;
+}
+
+float rads_to_rpm(float rads)
+{
+    return 60.0f * rads / (2.0f * M_PI);
+}
+
+/**
+ * Update motor and vehicle separately, since clutch is disengaged
+ */
+void update_speed_separately(struct vehicle_info *self, float deltatime)
+{
+    /* Update motor speed */
+    float torque = torque_at_rpm(self, self->engine_rpm) * self->throttle;
+    float mass = self->rotor_mass;
+    self->engine_rpm += rads_to_rpm(calculate_acceleration(torque, mass, deltatime));
+
+    /* Update vehicle speed */
+    float force = self->wind_coefficient;
+    mass = self->body_mass;
+    self->vehicle_speed += (force / mass) * deltatime;
+}
+
 int main(void) 
 {
     struct vehicle_info yamaha_fjr_1300;
@@ -114,8 +145,14 @@ int main(void)
     yamaha_fjr_1300.speed_torque_values = sizeof(rpm_torque_yamaha_fjr_1300) / sizeof(rpm_torque_yamaha_fjr_1300[0]);
     yamaha_fjr_1300.torque_at_rpm = rpm_torque_yamaha_fjr_1300;
 
+    yamaha_fjr_1300.rotor_mass = 2.0f;
+    yamaha_fjr_1300.rotor_drag_torque = 1.0f;
+
     /* Wheel size 180/55ZR17 */
     yamaha_fjr_1300.wheel_diameter = (17.0f * 25.4 + 55.0f) / 1000.0f;
+    yamaha_fjr_1300.body_mass = 250.0f;
+    yamaha_fjr_1300.wind_coefficient = 5.0f;
+
 
     printf("Gears: %d\n", yamaha_fjr_1300.gears);
     for (int i = 0; i < yamaha_fjr_1300.gears; i++) {
@@ -133,6 +170,16 @@ int main(void)
         float wheel_torque = get_wheel_torque(&yamaha_fjr_1300, rpm, gear);
         float vehicle_motor_force = wheel_torque / yamaha_fjr_1300.wheel_diameter / 2.0f;
         printf("Engine RPM: %f rpm, wheel torque: %f Nm, force: %fN\n", rpm, wheel_torque, vehicle_motor_force);
+    }
+
+    /* Check rpm and speed when disengaged clutch */
+    yamaha_fjr_1300.vehicle_speed = 100.0f;
+    yamaha_fjr_1300.engine_rpm = 2000.0f;
+    yamaha_fjr_1300.throttle = 1.0f;
+    for (int i = 0; i < 100; i++) {
+        printf("Speed %f, rpm %f\n", yamaha_fjr_1300.vehicle_speed, yamaha_fjr_1300.engine_rpm);
+        update_speed_separately(&yamaha_fjr_1300, 0.01f);
+
     }
 
 	return 0;
