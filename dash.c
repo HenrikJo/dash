@@ -29,7 +29,7 @@ float gear_ratio_yamaha_fjr_1300[] = { 0.0f,  2.5f, 1.722f, 1.35f, 1.111f, 0.962
 
 struct vehicle_info {
     /* Static info */
-    unsigned int gears;
+    unsigned int gears; /* Number of gears, 0 is neutral */
     float *gear_ratio;
 
     unsigned int speed_torque_values;
@@ -37,8 +37,11 @@ struct vehicle_info {
 
     /* Engine specific */
     float rotor_mass;
+    float rotor_radius;
     float rotor_drag_torque;
     float idle;
+    float primary_gear_reduction; /* Gear reduction from rotor to gearbox input */
+    float final_gear_reduction; /* Gear reduction from gearbox output to wheel */
 
     /* Vehicle specific */
     float wheel_diameter;
@@ -46,6 +49,8 @@ struct vehicle_info {
     float wind_coefficient;
 
     /* Dynamic state */
+    unsigned int selected_gear;
+
     float engine_rpm;
     float vehicle_speed;
 
@@ -121,6 +126,37 @@ float rads_to_rpm(float rads)
     return 60.0f * rads / (2.0f * M_PI);
 }
 
+float rpm_to_rads(float rpm) 
+{
+    return 2.0f * M_PI * rpm / 60.0f;
+}
+
+float kmh_to_ms(float kmh)
+{
+    return kmh / 3.6f;
+}
+
+float kmh_to_motor_side_rpm(struct vehicle_info *self)
+{
+    float speed_ms = kmh_to_ms(self->vehicle_speed);
+    float wheel_circumference = self->wheel_diameter * M_PI;
+    float wheel_rpm = (speed_ms * 60.0f) / wheel_circumference;
+    float gear_ratio = self->primary_gear_reduction + self->gear_ratio[self->selected_gear] + self->final_gear_reduction;
+    printf("speed_ms:%f\n", speed_ms);
+    printf("wheel_rpm:%f\n", wheel_rpm);
+    printf("self->selected_gear: %u\n", self->selected_gear);
+    printf("gear_ratio: %f\n", gear_ratio);
+    if (gear_ratio <= 0.0f) {
+        return 0.0f;
+    }
+    return wheel_rpm * gear_ratio;
+}
+
+float calc_moment_of_inertia(float mass, float radius)
+{
+    return mass * radius * radius / 2.0f;
+}
+
 float calc_kinetic_energy(float mass, float velocity)
 {
     return mass * velocity * velocity / 2.0f;
@@ -129,6 +165,21 @@ float calc_kinetic_energy(float mass, float velocity)
 float calculate_velocity(float kinetic_energy, float mass)
 {
     return sqrtf((kinetic_energy * 2.0f) / mass);
+}
+
+void calc_engaged_clutch_speeds(struct vehicle_info *self)
+{
+    /* Calculate rotor energy */
+    float moment_of_inertia = calc_moment_of_inertia(self->rotor_mass, self->rotor_radius);
+    float engine_rads = rpm_to_rads(self->engine_rpm);
+    float rotor_energy = calc_kinetic_energy(moment_of_inertia, engine_rads);
+    printf("Rotor energy: %f\n", rotor_energy);
+
+    float vehicle_energy = calc_kinetic_energy(self->body_mass, kmh_to_ms(self->vehicle_speed));
+    printf("Vehicle energy: %f\n", vehicle_energy);
+
+    float vehicle_motor_rpm = kmh_to_motor_side_rpm(self);
+    printf("vehicle_motor_rpm: %f\n", vehicle_motor_rpm);
 }
 
 /**
@@ -160,8 +211,14 @@ int main(void)
     yamaha_fjr_1300.torque_at_rpm = rpm_torque_yamaha_fjr_1300;
 
     yamaha_fjr_1300.rotor_mass = 1.0f;
+    yamaha_fjr_1300.rotor_radius = 0.1f;
     yamaha_fjr_1300.rotor_drag_torque = -10.0f;
     yamaha_fjr_1300.idle = 1400.0f;
+
+    yamaha_fjr_1300.primary_gear_reduction = 1.563f;
+    yamaha_fjr_1300.final_gear_reduction = 2.773f;
+
+    yamaha_fjr_1300.selected_gear = 1;
 
     /* Wheel size 180/55ZR17 */
     yamaha_fjr_1300.wheel_diameter = (17.0f * 25.4 + 55.0f) / 1000.0f;
@@ -171,7 +228,8 @@ int main(void)
 
     printf("Gears: %d\n", yamaha_fjr_1300.gears);
     for (int i = 0; i < yamaha_fjr_1300.gears; i++) {
-        printf("Ratio at gear %d: %f\n", i+1, yamaha_fjr_1300.gear_ratio[i]);
+        yamaha_fjr_1300.selected_gear = i+1;
+        printf("Ratio at gear %d: %f\n", yamaha_fjr_1300.selected_gear, yamaha_fjr_1300.gear_ratio[i]);
     }
 
     for (float rpm = 0.0f; rpm < 10000.0f; rpm += 100.0f) {
@@ -201,6 +259,9 @@ int main(void)
         printf("Speed %f, rpm %f\n", yamaha_fjr_1300.vehicle_speed, yamaha_fjr_1300.engine_rpm);
         update_speed_separately(&yamaha_fjr_1300, 0.1f);
     }
+
+    yamaha_fjr_1300.selected_gear = 1;
+    calc_engaged_clutch_speeds(&yamaha_fjr_1300);
 
 	return 0;
 }
