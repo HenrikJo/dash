@@ -142,10 +142,6 @@ float kmh_to_motor_side_rpm(struct vehicle_info *self)
     float wheel_circumference = self->wheel_diameter * M_PI;
     float wheel_rpm = (speed_ms * 60.0f) / wheel_circumference;
     float gear_ratio = self->primary_gear_reduction + self->gear_ratio[self->selected_gear] + self->final_gear_reduction;
-    printf("speed_ms:%f\n", speed_ms);
-    printf("wheel_rpm:%f\n", wheel_rpm);
-    printf("self->selected_gear: %u\n", self->selected_gear);
-    printf("gear_ratio: %f\n", gear_ratio);
     if (gear_ratio <= 0.0f) {
         return 0.0f;
     }
@@ -222,6 +218,14 @@ void update_speed_separately(struct vehicle_info *self, float deltatime)
     self->vehicle_speed += (force / mass) * deltatime;
 }
 
+/**
+ * Update motor and vehicle speed, clutch engaged
+ */
+void update_speed_combined(struct vehicle_info *self, float deltatime)
+{
+    /* Todo here */
+}
+
 int main(void) 
 {
     struct vehicle_info yamaha_fjr_1300;
@@ -281,8 +285,23 @@ int main(void)
         update_speed_separately(&yamaha_fjr_1300, 0.1f);
     }
 
+    /* Calculate speed going from disengaged to engaged clutch */
     yamaha_fjr_1300.selected_gear = 1;
     calc_engaged_clutch_speeds(&yamaha_fjr_1300);
+
+    /* Simulate full throttle */
+    yamaha_fjr_1300.throttle = 1.0f;
+    for (int i = 0; i < 1000; i++) {
+        printf("Speed %f, rpm %f\n", yamaha_fjr_1300.vehicle_speed, yamaha_fjr_1300.engine_rpm);
+        update_speed_combined(&yamaha_fjr_1300, 0.1f);
+    }
+
+    /* Simulate no throttle */
+    yamaha_fjr_1300.throttle = 0.0f;
+    for (int i = 0; i < 1000; i++) {
+        printf("Speed %f, rpm %f\n", yamaha_fjr_1300.vehicle_speed, yamaha_fjr_1300.engine_rpm);
+        update_speed_combined(&yamaha_fjr_1300, 0.1f);
+    }
 
 	return 0;
 }
