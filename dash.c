@@ -246,7 +246,6 @@ void update_speed_combined(struct vehicle_info *self, float deltatime)
     /* Calculate total torque both motoring and braking */
     float motor_torque = torque_at_rpm(self, self->engine_rpm) * self->throttle;
     float total_torque = wind_torque + motor_torque + get_motor_drag_torque(self);
-    printf("total_torque: %f\r\t\t\t\t", total_torque);
 
     /* Calculate new speed */
     self->engine_rpm += rads_to_rpm(calculate_acceleration(total_torque, total_mass, deltatime));
@@ -318,13 +317,13 @@ int main(void)
     yamaha_fjr_1300.vehicle_speed = 100.0f;
     yamaha_fjr_1300.engine_rpm = 2000.0f;
     yamaha_fjr_1300.throttle = 1.0f;
-    for (int i = 0; i < 1000; i++) {
+    for (int i = 0; i < 50; i++) {
         printf("Speed %f, rpm %f\n", yamaha_fjr_1300.vehicle_speed, yamaha_fjr_1300.engine_rpm);
         update_speed_separately(&yamaha_fjr_1300, 0.1f);
     }
 
     yamaha_fjr_1300.throttle = 0.0f;
-    for (int i = 0; i < 1000; i++) {
+    for (int i = 0; i < 50; i++) {
         printf("Speed %f, rpm %f\n", yamaha_fjr_1300.vehicle_speed, yamaha_fjr_1300.engine_rpm);
         update_speed_separately(&yamaha_fjr_1300, 0.1f);
     }
@@ -333,16 +332,16 @@ int main(void)
     yamaha_fjr_1300.selected_gear = 1;
     calc_engaged_clutch_speeds(&yamaha_fjr_1300);
 
-    printf("\nSimulate full throttle\n");
-    yamaha_fjr_1300.throttle = 1.0f;
-    for (int i = 0; i < 1000; i++) {
+    printf("\nSimulate no throttle\n");
+    yamaha_fjr_1300.throttle = 0.0f;
+    for (int i = 0; i < 100; i++) {
         printf("Speed %f, rpm %f\n", yamaha_fjr_1300.vehicle_speed, yamaha_fjr_1300.engine_rpm);
         update_speed_combined(&yamaha_fjr_1300, 0.1f);
     }
 
-    printf("\nSimulate no throttle\n");
-    yamaha_fjr_1300.throttle = 0.0f;
-    for (int i = 0; i < 1000; i++) {
+    printf("\nSimulate full throttle\n");
+    yamaha_fjr_1300.throttle = 1.0f;
+    for (int i = 0; i < 50; i++) {
         printf("Speed %f, rpm %f\n", yamaha_fjr_1300.vehicle_speed, yamaha_fjr_1300.engine_rpm);
         update_speed_combined(&yamaha_fjr_1300, 0.1f);
     }
