@@ -223,6 +223,8 @@ float get_motor_drag_torque(struct vehicle_info *self)
     float max = self->idle + self->idle * idle_offset;
     float min = self->idle;
     float scaling = (self->engine_rpm - min) / (max - min);
+    scaling = scaling > 1.0f ? 1.0f : scaling;
+    scaling = scaling < 0.0f ? 0.0f : scaling;
     return self->rotor_drag_torque * scaling;
 }
 
