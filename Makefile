@@ -1,5 +1,5 @@
 vehicle.binblob:vehicle.c
-	gcc vehicle.c -lm -o vehicle.binblob
+	gcc vehicle.c -lm -o vehicle.binblob -Wall -Werror
 
 run:vehicle.binblob
 	./vehicle.binblob
