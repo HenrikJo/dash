@@ -1,3 +1,4 @@
+#include "vehicle.h"
 #include <assert.h>
 #include <math.h>
 #include <stdio.h>
@@ -26,38 +27,6 @@ struct rpm_torque rpm_torque_yamaha_fjr_1300[] = {
 
 /* Index 0 is used for neutral */
 float gear_ratio_yamaha_fjr_1300[] = { 0.0f,  2.5f, 1.722f, 1.35f, 1.111f, 0.962f, 0.846f };
-
-struct vehicle_info {
-    /* Static info */
-    unsigned int gears; /* Number of gears, 0 is neutral */
-    float *gear_ratio;
-
-    unsigned int speed_torque_values;
-    struct rpm_torque *torque_at_rpm;
-
-    /* Engine specific */
-    float rotor_mass;
-    float rotor_radius;
-    float rotor_drag_torque;
-    float idle;
-    float primary_gear_reduction; /* Gear reduction from rotor to gearbox input */
-    float final_gear_reduction; /* Gear reduction from gearbox output to wheel */
-
-    /* Vehicle specific */
-    float wheel_diameter;
-    float body_mass;
-
-    /* Dynamic state */
-    unsigned int selected_gear;
-
-    float engine_rpm;
-    float vehicle_speed;
-
-    float throttle; /* 0 -> 1 for 0% -> 100% of available torque */
-    float brake;
-
-    unsigned int clutch_engaged; /* Is the clutch engaged, 0 for disengaged and 1 for engaged */
-};
 
 float torque_at_rpm(struct vehicle_info *self, float rpm)
 {
@@ -270,6 +239,8 @@ void update_speed_separately(struct vehicle_info *self, float deltatime)
     mass = self->body_mass;
     self->vehicle_speed += (force / mass) * deltatime;
 }
+
+
 
 int main(void) 
 {
