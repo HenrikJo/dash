@@ -274,6 +274,11 @@ unsigned int set_gear(struct vehicle_info *self, unsigned int gear)
     if (gear <= self->gears) {
         self->selected_gear = gear;
     }
+    if (self->clutch_engaged == 1) {
+        calc_engaged_clutch_speeds(self);
+    } else {
+        printf("clutch not engaged\n");
+    }
     return self->selected_gear;
 }
 
@@ -317,6 +322,7 @@ int main(void)
 
     /* Calculate speed going from disengaged to engaged clutch */
     yamaha_fjr_1300->selected_gear = 1;
+    yamaha_fjr_1300->clutch_engaged = 1;
     calc_engaged_clutch_speeds(yamaha_fjr_1300);
 
     printf("\nSimulate no throttle\n");
@@ -328,9 +334,19 @@ int main(void)
 
     printf("\nSimulate full throttle\n");
     yamaha_fjr_1300->throttle = 1.0f;
-    for (int i = 0; i < 50; i++) {
+    for (int i = 0; i < 70; i++) {
         printf("Speed %f, rpm %f\n", yamaha_fjr_1300->vehicle_speed, yamaha_fjr_1300->engine_rpm);
         update_speed_combined(yamaha_fjr_1300, 0.1f);
+    }
+
+    printf("Go through the gears\n");
+    for (unsigned int gear = 1; gear <= yamaha_fjr_1300->gears - 1; gear++) {
+        printf("Set gear: %u\n", gear);
+        set_gear(yamaha_fjr_1300, gear);
+        for (int i = 0; i < 70; i++) {
+            printf("Speed %f km/h, rpm %f torque: %f Nm\n", yamaha_fjr_1300->vehicle_speed, yamaha_fjr_1300->engine_rpm, torque_at_rpm(yamaha_fjr_1300, yamaha_fjr_1300->engine_rpm));
+            update_speed_combined(yamaha_fjr_1300, 0.1f);
+        }
     }
 
 	return 0;
