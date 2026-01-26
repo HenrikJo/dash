@@ -1,17 +1,20 @@
-vehicle.binblob:vehicle.c
-	gcc vehicle.c -lm -o vehicle.binblob -Wall -Werror
+model.o:model.c
+	gcc -c model.c -lm -o model.o -Wall -Werror
 
-run:vehicle.binblob
-	./vehicle.binblob
+main:main.c model.o
+	gcc main.c model.o -lm -Wall -Werror -o main
 
-host_simulation.binblob: host_simulation.c
-	gcc host_simulation.c -lSDL2 -O2 -o host_simulation.binblob
+run_main:main
+	./main
 
-host_run:host_simulation.binblob
-	./host_simulation.binblob
+control.o: control.c
+	gcc control.c -lSDL2 -O2 -o control.o
+
+host_run:control.o
+	./control.o
 
 clean:
-	gio trash vehicle.binblob host_simulation.binblob
+	gio trash model.o control.o
 
 dependencies:
 	sudo apt install libsdl2-dev

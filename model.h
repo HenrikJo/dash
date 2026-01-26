@@ -32,3 +32,8 @@ struct vehicle_info {
 
 struct vehicle_info *create_vehicle(void);
 unsigned int set_gear(struct vehicle_info *self, unsigned int gear);
+float get_total_gear_ratio(struct vehicle_info *self);
+float torque_at_rpm(struct vehicle_info *self, float rpm);
+float get_wheel_torque(struct vehicle_info *self, float rpm, unsigned int gear);
+void update_speed(struct vehicle_info *self, float deltatime);
+void engage_clutch(struct vehicle_info *self);
