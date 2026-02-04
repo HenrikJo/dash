@@ -3,3 +3,4 @@ main
 test
 secrets.yaml
 .vscode*
+trace/*
