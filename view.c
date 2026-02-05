@@ -9,19 +9,21 @@ void create_format_file(void)
     }
 
     fprintf(f, "throttle RAW f 1\n");
-    fprintf(f, "brake RAW f 1\n");
     fprintf(f, "gear RAW f 1\n");
     fprintf(f, "torque RAW f 1\n");
-    fprintf(f, "speed RAW f 1\n");
+    fprintf(f, "speed RAW f 1\n");;
+    fprintf(f, "rpm RAW f 1\n");
 
     fclose(f);
 
 }
 
-int write_field(const char *dir, const char *name, float *data, size_t count) {
+int write_field(const char *dir, const char *name, float *data, size_t count)
+{
     char path[512];
+    printf("%f\n", *data);
     snprintf(path, sizeof(path), "%s/%s", dir, name);
-    FILE *f = fopen(path, "wb");
+    FILE *f = fopen(path, "a");
     if (!f) {
         perror(path);
         return -1;

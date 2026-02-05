@@ -7,8 +7,8 @@
 
 typedef struct {
     SDL_Rect bar;
-    int min, max;
-    int value;
+    float min, max;
+    float value;
     bool dragging;
 } Slider;
 
