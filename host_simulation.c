@@ -71,10 +71,11 @@ int main(void)
 
         /* HELD keys */
         const Uint8 *keys = SDL_GetKeyboardState(NULL);
-        if (keys[SDL_SCANCODE_W])
+        if (keys[SDL_SCANCODE_W]) {
             throttle.value += 0.01f;
-        if (keys[SDL_SCANCODE_SPACE])
+        } else {
             throttle.value -= 0.01f;
+        }
 
         if (throttle.value > throttle.max) throttle.value = throttle.max;
         if (throttle.value < throttle.min) throttle.value = throttle.min;
