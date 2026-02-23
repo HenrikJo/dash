@@ -4,3 +4,5 @@ test
 secrets.yaml
 .vscode*
 trace/*
+venv/*
+kst*
