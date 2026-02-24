@@ -156,26 +156,39 @@ void calc_engaged_clutch_speeds(struct vehicle_info *self)
 {
     /* Calculate rotor energy */
     float moment_of_inertia = calc_moment_of_inertia(self->rotor_mass, self->rotor_radius);
-    printf("Engine rpm: %f\n", self->engine_rpm);
+    if (debug > 0) {
+        printf("Engine rpm: %f\n", self->engine_rpm);
+    }
     float engine_rads = rpm_to_rads(self->engine_rpm);
     float rotor_energy = calc_kinetic_energy(moment_of_inertia, engine_rads);
-    printf("Rotor energy: %f\n", rotor_energy);
-
+    if (debug > 0) {
+        printf("Rotor energy: %f\n", rotor_energy);
+    }
     float vehicle_energy = calc_kinetic_energy(self->body_mass, kmh_to_ms(self->vehicle_speed));
-    printf("Vehicle energy: %f\n", vehicle_energy);
+    if (debug > 0) {
+        printf("Vehicle energy: %f\n", vehicle_energy);
+    }
 
     float vehicle_motor_rpm = kmh_to_motor_side_rpm(self);
-    printf("vehicle_motor_rpm: %f motor_speed: %f\n", vehicle_motor_rpm, motor_side_rpm_to_kmh(self));
+    if (debug > 0) {
+        printf("vehicle_motor_rpm: %f motor_speed: %f\n", vehicle_motor_rpm, motor_side_rpm_to_kmh(self));
+    }
 
     float vehicle_weight_motor_side = calc_mass(vehicle_energy, rpm_to_rads(vehicle_motor_rpm));
-    printf("vehicle_weight_motor_side: %f\n", vehicle_weight_motor_side);
+    if (debug > 0) {
+        printf("vehicle_weight_motor_side: %f\n", vehicle_weight_motor_side);
+    }
 
     float combined_velocity = rads_to_rpm(calculate_velocity(vehicle_energy + rotor_energy, vehicle_weight_motor_side + moment_of_inertia));
-    printf("combined_velocity: %f\n", combined_velocity);
+    if (debug > 0) {
+        printf("combined_velocity: %f\n", combined_velocity);
+    }
 
     self->engine_rpm = combined_velocity;
     self->vehicle_speed = motor_side_rpm_to_kmh(self);
-    printf("self->vehicle_speed: %f\n", self->vehicle_speed);
+    if (debug > 0) {
+        printf("self->vehicle_speed: %f\n", self->vehicle_speed);
+    }
 }
 
 float wind_force(float air_density, float velocity, float drag_coefficient, float front_area)
@@ -305,7 +318,9 @@ unsigned int set_gear(struct vehicle_info *self, unsigned int gear)
     if (self->clutch_engaged == 1 && self->selected_gear > 0) {
         calc_engaged_clutch_speeds(self);
     } else {
-        printf("Clutch or gear not engaged, no torque transfer\n");
+        if (debug > 0) {
+            printf("Clutch or gear not engaged, no torque transfer\n");
+        }
     }
     return self->selected_gear;
 }
