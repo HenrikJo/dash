@@ -5,6 +5,7 @@
 #include "driver/ledc.h"
 #include "driver/gpio.h"
 #include "esp_err.h"
+#include <math.h>
 
 #define SERVO1_GPIO 4
 #define SERVO2_GPIO 5
@@ -85,12 +86,16 @@ static void update_view(struct vehicle_info *self)
 {
     float max_rpm = 10000.0f;
     float max_speed = 200.0f;
-    float rpm = self->engine_rpm / max_rpm;
+    float rpm = 180 * self->engine_rpm / max_rpm;
     rpm = rpm > 180 ? 180 : rpm;
     servo_set_angle(LEDC_CHANNEL_SERVO1, rpm);
 
-    float speed = self->vehicle_speed / max_speed;
-    speed = speed > 180 ? 180 : speed;
+    float speed = 180 * self->vehicle_speed / max_speed;
+    speed = speed > 180 ? 180 : speed < 0 ? 0 : speed;
+    if (isfinite(speed) == 0) {
+        speed = 0.0f;
+    }
+    printf("%fkm/h %frpm\n", speed, rpm);
     servo_set_angle(LEDC_CHANNEL_SERVO2, speed);
 }
 
