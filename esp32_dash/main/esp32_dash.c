@@ -85,17 +85,19 @@ static void buttons_init(void)
 static void update_view(struct vehicle_info *self)
 {
     float max_rpm = 10000.0f;
-    float max_speed = 200.0f;
     float rpm = 180 * self->engine_rpm / max_rpm;
     rpm = rpm > 180 ? 180 : rpm;
+    rpm = 180 - rpm; /* Invert RPM angle for servo */
     servo_set_angle(LEDC_CHANNEL_SERVO1, rpm);
 
+    float max_speed = 300.0f;
     float speed = 180 * self->vehicle_speed / max_speed;
     speed = speed > 180 ? 180 : speed < 0 ? 0 : speed;
     if (isfinite(speed) == 0) {
         speed = 0.0f;
     }
     printf("%fkm/h %frpm\n", speed, rpm);
+    speed = 180 - speed; /* Invert speed angle for servo */
     servo_set_angle(LEDC_CHANNEL_SERVO2, speed);
 }
 

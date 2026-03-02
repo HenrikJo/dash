@@ -18,6 +18,7 @@ struct vehicle_info {
     /* Vehicle specific */
     float wheel_diameter;
     float body_mass;
+    float brake_torque_no_throttle; /* To make vehicle slow down faster, use brake when no throttle */
 
     /* Dynamic state */
     unsigned int selected_gear;
@@ -26,7 +27,6 @@ struct vehicle_info {
     float vehicle_speed;
 
     float throttle; /* 0 -> 1 for 0% -> 100% of available torque */
-    float brake;
     float present_motor_torque;
 
     unsigned int clutch_engaged; /* Is the clutch engaged, 0 for disengaged and 1 for engaged */
