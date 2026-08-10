@@ -5,7 +5,7 @@ int main(int argc, char **argv) {
     float throttle[FRAMES], brake[FRAMES], gear[FRAMES];
     float torque[FRAMES], speed[FRAMES];
 
-    // Create output directory
+    /* Create output directory */
     if (mkdir(outdir, 0755) && errno != EEXIST) {
         perror("mkdir");
         return 1;

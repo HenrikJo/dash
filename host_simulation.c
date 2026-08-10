@@ -2,8 +2,26 @@
 #include "view.h"
 #include "control.h"
 
+static void update_view(const char *outdir, struct vehicle_info *self)
+{
+    write_field(outdir, "throttle", &self->throttle, 1);
+    write_field(outdir, "brake", &self->brake, 1);
+    // write_field(outdir, "gear", &self->selected_gear, 1);
+    // write_field(outdir, "torque", &self->torque, 1);
+    write_field(outdir, "rpm", &self->engine_rpm, 1);
+    write_field(outdir, "speed", &self->vehicle_speed, 1);
+}
+
 int main(void)
 {
+    /* Create output directory */
+    const char *outdir = TRACE_PATH;
+    if (mkdir(outdir, 0755) && errno != EEXIST) {
+        perror("mkdir");
+        return 1;
+    }
+    create_format_file();
+
     /* Create model */
     struct vehicle_info *yamaha_fjr_1300 = create_vehicle();
 
@@ -87,6 +105,8 @@ int main(void)
             );
             SDL_RenderFillRect(ren, &g);
         }
+        
+        update_view(outdir, yamaha_fjr_1300);
 
         SDL_RenderPresent(ren);
         SDL_Delay(16);
