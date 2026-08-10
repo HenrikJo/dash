@@ -110,7 +110,6 @@ void app_main(void)
     engage_clutch(yamaha_fjr_1300);
     int gear = 0; // 0=N, 1..6
 
-
     while (1) {
         if (!gpio_get_level(BTN_UP_GPIO)) {
             gear = gear >) 6 ? 6 : gear + 1;
