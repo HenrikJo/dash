@@ -121,14 +121,9 @@ float kmh_to_motor_side_rpm(struct vehicle_info *self)
     return wheel_rpm * gear_ratio;
 }
 
-float get_gear_ratio(struct vehicle_info *self) 
-{
-    return self->primary_gear_reduction + self->gear_ratio[self->selected_gear] + self->final_gear_reduction;
-}
-
 float motor_side_rpm_to_kmh(struct vehicle_info *self) 
 {
-    float gear_ratio = get_gear_ratio(self);
+    float gear_ratio = get_total_gear_ratio(self);
     float wheel_freq_hz = self->engine_rpm / (gear_ratio * 60.0f);
     float wheel_speed_m_s = wheel_freq_hz * self->wheel_diameter * M_PI;
     return wheel_speed_m_s * 3.6f;
@@ -166,7 +161,8 @@ void calc_engaged_clutch_speeds(struct vehicle_info *self)
     printf("Vehicle energy: %f\n", vehicle_energy);
 
     float vehicle_motor_rpm = kmh_to_motor_side_rpm(self);
-    printf("vehicle_motor_rpm: %f\n", vehicle_motor_rpm);
+    printf("vehicle_motor_rpm: %f motor_speed: %f\n", vehicle_motor_rpm, motor_side_rpm_to_kmh(self));
+
     float vehicle_weight_motor_side = calc_mass(vehicle_energy, rpm_to_rads(vehicle_motor_rpm));
 
     float combined_velocity = rads_to_rpm(calculate_velocity(vehicle_energy + rotor_energy, vehicle_weight_motor_side + moment_of_inertia));
@@ -215,7 +211,7 @@ void update_speed_combined(struct vehicle_info *self, float deltatime)
     float total_mass = moment_of_inertia + vehicle_weight_motor_side;
 
     /* Calculate wind resistance torque */
-    float wind_torque = get_vehicle_wind_force(self) / get_gear_ratio(self);
+    float wind_torque = get_vehicle_wind_force(self) / get_total_gear_ratio(self);
 
     /* Calculate total torque both motoring and braking */
     float motor_torque = torque_at_rpm(self, self->engine_rpm) * self->throttle;
@@ -340,7 +336,7 @@ int main(void)
 
     printf("\nSimulate full throttle\n");
     yamaha_fjr_1300->throttle = 1.0f;
-    for (int i = 0; i < 70; i++) {
+    for (int i = 0; i < 20; i++) {
         printf("Speed %f, rpm %f\n", yamaha_fjr_1300->vehicle_speed, yamaha_fjr_1300->engine_rpm);
         update_speed_combined(yamaha_fjr_1300, 0.1f);
     }
