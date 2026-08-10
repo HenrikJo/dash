@@ -46,7 +46,6 @@ struct vehicle_info {
     /* Vehicle specific */
     float wheel_diameter;
     float body_mass;
-    float wind_coefficient;
 
     /* Dynamic state */
     unsigned int selected_gear;
@@ -148,9 +147,14 @@ float kmh_to_motor_side_rpm(struct vehicle_info *self)
     return wheel_rpm * gear_ratio;
 }
 
+float get_gear_ratio(struct vehicle_info *self) 
+{
+    return self->primary_gear_reduction + self->gear_ratio[self->selected_gear] + self->final_gear_reduction;
+}
+
 float motor_side_rpm_to_kmh(struct vehicle_info *self) 
 {
-    float gear_ratio = self->primary_gear_reduction + self->gear_ratio[self->selected_gear] + self->final_gear_reduction;
+    float gear_ratio = get_gear_ratio(self);
     float wheel_freq_hz = self->engine_rpm / (gear_ratio * 60.0f);
     float wheel_speed_m_s = wheel_freq_hz * self->wheel_diameter * M_PI;
     return wheel_speed_m_s * 3.6f;
@@ -199,6 +203,54 @@ void calc_engaged_clutch_speeds(struct vehicle_info *self)
     printf("self->vehicle_speed: %f\n", self->vehicle_speed);
 }
 
+float wind_force(float air_density, float velocity, float drag_coefficient, float front_area)
+{    
+    return -air_density * velocity * velocity * drag_coefficient * front_area / 2.0f;
+}
+
+float get_vehicle_wind_force(struct vehicle_info *self) 
+{
+    float drag_coefficient = 0.29f;
+    float area = 1.5f;
+    float air_density = 1.225f;
+    return wind_force(air_density, kmh_to_ms(self->vehicle_speed), drag_coefficient, area);
+}
+
+float get_motor_drag_torque(struct vehicle_info *self)
+{
+    /* Make it so the drag torque does not go below "idle" */
+    float idle_offset = 0.1f;
+    float max = self->idle + self->idle * idle_offset;
+    float min = self->idle;
+    float scaling = (self->engine_rpm - min) / (max - min);
+    return self->rotor_drag_torque * scaling;
+}
+
+/**
+ * Update motor and vehicle speed, clutch engaged
+ */
+void update_speed_combined(struct vehicle_info *self, float deltatime)
+{
+    /* Get combined total equivalent mass */
+    float moment_of_inertia = calc_moment_of_inertia(self->rotor_mass, self->rotor_radius);
+    float vehicle_energy = calc_kinetic_energy(self->body_mass, kmh_to_ms(self->vehicle_speed));
+    float vehicle_motor_rpm = kmh_to_motor_side_rpm(self);
+    float vehicle_weight_motor_side = calc_mass(vehicle_energy, rpm_to_rads(vehicle_motor_rpm));
+    float total_mass = moment_of_inertia + vehicle_weight_motor_side;
+
+    /* Calculate wind resistance torque */
+    float wind_torque = get_vehicle_wind_force(self) / get_gear_ratio(self);
+
+    /* Calculate total torque both motoring and braking */
+    float motor_torque = torque_at_rpm(self, self->engine_rpm) * self->throttle;
+    float total_torque = wind_torque + motor_torque + get_motor_drag_torque(self);
+    printf("total_torque: %f\r\t\t\t\t", total_torque);
+
+    /* Calculate new speed */
+    self->engine_rpm += rads_to_rpm(calculate_acceleration(total_torque, total_mass, deltatime));
+    self->vehicle_speed = motor_side_rpm_to_kmh(self);
+}
+
 /**
  * Update motor and vehicle separately, since clutch is disengaged
  */
@@ -207,23 +259,15 @@ void update_speed_separately(struct vehicle_info *self, float deltatime)
     /* Update motor speed */
     float torque = torque_at_rpm(self, self->engine_rpm) * self->throttle;
     float mass = self->rotor_mass;
-    self->engine_rpm += rads_to_rpm(calculate_acceleration(torque + self->rotor_drag_torque, mass, deltatime));
+    self->engine_rpm += rads_to_rpm(calculate_acceleration(torque + get_motor_drag_torque(self), mass, deltatime));
     if (self->engine_rpm < self->idle) {
         self->engine_rpm = self->idle;
     }
 
     /* Update vehicle speed */
-    float force = self->wind_coefficient;
+    float force = get_vehicle_wind_force(self);
     mass = self->body_mass;
     self->vehicle_speed += (force / mass) * deltatime;
-}
-
-/**
- * Update motor and vehicle speed, clutch engaged
- */
-void update_speed_combined(struct vehicle_info *self, float deltatime)
-{
-    /* Todo here */
 }
 
 int main(void) 
@@ -248,13 +292,11 @@ int main(void)
     /* Wheel size 180/55ZR17 */
     yamaha_fjr_1300.wheel_diameter = (17.0f * 25.4 + 55.0f) / 1000.0f;
     yamaha_fjr_1300.body_mass = 250.0f;
-    yamaha_fjr_1300.wind_coefficient = -5.0f;
-
 
     printf("Gears: %d\n", yamaha_fjr_1300.gears);
     for (int i = 0; i < yamaha_fjr_1300.gears; i++) {
         yamaha_fjr_1300.selected_gear = i+1;
-        printf("Ratio at gear %d: %f\n", yamaha_fjr_1300.selected_gear, yamaha_fjr_1300.gear_ratio[i]);
+        printf("Ratio at gear %d: %f\n", yamaha_fjr_1300.selected_gear - 1, yamaha_fjr_1300.gear_ratio[i]);
     }
 
     for (float rpm = 0.0f; rpm < 10000.0f; rpm += 100.0f) {
@@ -289,14 +331,14 @@ int main(void)
     yamaha_fjr_1300.selected_gear = 1;
     calc_engaged_clutch_speeds(&yamaha_fjr_1300);
 
-    /* Simulate full throttle */
+    printf("\nSimulate full throttle\n");
     yamaha_fjr_1300.throttle = 1.0f;
     for (int i = 0; i < 1000; i++) {
         printf("Speed %f, rpm %f\n", yamaha_fjr_1300.vehicle_speed, yamaha_fjr_1300.engine_rpm);
         update_speed_combined(&yamaha_fjr_1300, 0.1f);
     }
 
-    /* Simulate no throttle */
+    printf("\nSimulate no throttle\n");
     yamaha_fjr_1300.throttle = 0.0f;
     for (int i = 0; i < 1000; i++) {
         printf("Speed %f, rpm %f\n", yamaha_fjr_1300.vehicle_speed, yamaha_fjr_1300.engine_rpm);
