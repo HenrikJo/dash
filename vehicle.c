@@ -68,6 +68,11 @@ float torque_at_rpm(struct vehicle_info *self, float rpm)
     return 0.0f;
 }
 
+float get_total_gear_ratio(struct vehicle_info *self)
+{
+    return self->primary_gear_reduction * self->gear_ratio[self->selected_gear] * self->final_gear_reduction;
+}
+
 float get_wheel_torque(struct vehicle_info *self, float rpm, unsigned int gear) 
 {
     if (gear == 0 || gear > self->gears) {
@@ -76,8 +81,7 @@ float get_wheel_torque(struct vehicle_info *self, float rpm, unsigned int gear)
     }
 
     float motor_torque = torque_at_rpm(self, rpm);
-
-    return motor_torque * self->gear_ratio[gear];
+    return motor_torque * get_total_gear_ratio(self);
 }
 
 float rpm_to_rev(float rpm, unsigned int gear)
@@ -110,7 +114,7 @@ float kmh_to_motor_side_rpm(struct vehicle_info *self)
     float speed_ms = kmh_to_ms(self->vehicle_speed);
     float wheel_circumference = self->wheel_diameter * M_PI;
     float wheel_rpm = (speed_ms * 60.0f) / wheel_circumference;
-    float gear_ratio = self->primary_gear_reduction + self->gear_ratio[self->selected_gear] + self->final_gear_reduction;
+    float gear_ratio = get_total_gear_ratio(self);
     if (gear_ratio <= 0.0f) {
         return 0.0f;
     }
@@ -288,8 +292,8 @@ int main(void)
 
     printf("Gears: %d\n", yamaha_fjr_1300->gears);
     for (int i = 0; i < yamaha_fjr_1300->gears; i++) {
-        yamaha_fjr_1300->selected_gear = i+1;
-        printf("Ratio at gear %d: %f\n", yamaha_fjr_1300->selected_gear - 1, yamaha_fjr_1300->gear_ratio[i]);
+        yamaha_fjr_1300->selected_gear = i;
+        printf("Ratio at gear %d: %f total ratio:%f\n", yamaha_fjr_1300->selected_gear, yamaha_fjr_1300->gear_ratio[i], get_total_gear_ratio(yamaha_fjr_1300));
     }
 
     for (float rpm = 0.0f; rpm < 10000.0f; rpm += 100.0f) {
@@ -299,7 +303,9 @@ int main(void)
 
     /* Check wheel torque at peak torque rpm */
     float rpm = 6500.0f;
-    for (unsigned int gear = 0; gear <= yamaha_fjr_1300->gears; gear++) {
+    for (unsigned int gear = 0; gear < yamaha_fjr_1300->gears; gear++) {
+        printf("Set gear: %u\n", gear);
+        set_gear(yamaha_fjr_1300, gear); 
         float wheel_torque = get_wheel_torque(yamaha_fjr_1300, rpm, gear);
         float vehicle_motor_force = wheel_torque / yamaha_fjr_1300->wheel_diameter / 2.0f;
         printf("Engine RPM: %f rpm, wheel torque: %f Nm, force: %fN\n", rpm, wheel_torque, vehicle_motor_force);
