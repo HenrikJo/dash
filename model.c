@@ -213,7 +213,8 @@ float get_motor_drag_torque(struct vehicle_info *self)
     float scaling = (self->engine_rpm - min) / (max - min);
     scaling = scaling > 1.0f ? 1.0f : scaling;
     scaling = scaling < 0.0f ? 0.0f : scaling;
-    return self->rotor_drag_torque * scaling;
+    float extra_brake_torque = self->rotor_drag_torque_no_throttle * (1.0f - self->throttle);
+    return (self->rotor_drag_torque + extra_brake_torque) * scaling;
 }
 
 /**
@@ -252,7 +253,8 @@ void update_speed_separately(struct vehicle_info *self, float deltatime)
     /* Update motor speed */
     float torque = torque_at_rpm(self, self->engine_rpm) * self->throttle;
     float mass = self->rotor_mass;
-    self->engine_rpm += rads_to_rpm(calculate_acceleration(torque + get_motor_drag_torque(self), mass, deltatime));
+    float inertia = calc_moment_of_inertia(self->rotor_mass, self->rotor_radius);
+    self->engine_rpm += rads_to_rpm(calculate_acceleration(torque + get_motor_drag_torque(self), inertia, deltatime));
     
     if (isfinite(self->engine_rpm) == 0) {
         self->engine_rpm = self->idle;
@@ -295,7 +297,8 @@ struct vehicle_info *create_vehicle(void)
 
     yamaha_fjr_1300->rotor_mass = 1.0f;
     yamaha_fjr_1300->rotor_radius = 0.1f;
-    yamaha_fjr_1300->rotor_drag_torque = -10.0f;
+    yamaha_fjr_1300->rotor_drag_torque = -1.0f;
+    yamaha_fjr_1300->rotor_drag_torque_no_throttle = -10.0f;
     yamaha_fjr_1300->idle = 1400.0f;
 
     yamaha_fjr_1300->primary_gear_reduction = 1.563f;

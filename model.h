@@ -10,6 +10,7 @@ struct vehicle_info {
     float rotor_mass;
     float rotor_radius;
     float rotor_drag_torque;
+    float rotor_drag_torque_no_throttle;
     float idle;
     float primary_gear_reduction; /* Gear reduction from rotor to gearbox input */
     float final_gear_reduction; /* Gear reduction from gearbox output to wheel */
