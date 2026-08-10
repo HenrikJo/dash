@@ -152,8 +152,12 @@ float kmh_to_motor_side_rpm(struct vehicle_info *self)
     return wheel_rpm * gear_ratio;
 }
 
-float motor_side_rpm_to_kmh(struct vehicle_info *self) {
-    /* Todo here continue */
+float motor_side_rpm_to_kmh(struct vehicle_info *self) 
+{
+    float gear_ratio = self->primary_gear_reduction + self->gear_ratio[self->selected_gear] + self->final_gear_reduction;
+    float wheel_freq_hz = self->engine_rpm / (gear_ratio * 60.0f);
+    float wheel_speed_m_s = wheel_freq_hz * self->wheel_diameter * M_PI;
+    return wheel_speed_m_s * 3.6f;
 }
 
 float calc_moment_of_inertia(float mass, float radius)
@@ -196,6 +200,7 @@ void calc_engaged_clutch_speeds(struct vehicle_info *self)
 
     self->engine_rpm = combined_velocity;
     self->vehicle_speed = motor_side_rpm_to_kmh(self);
+    printf("self->vehicle_speed: %f\n", self->vehicle_speed);
 }
 
 /**
