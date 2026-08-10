@@ -5,9 +5,11 @@
 static void update_view(const char *outdir, struct vehicle_info *self)
 {
     write_field(outdir, "throttle", &self->throttle, 1);
-    write_field(outdir, "brake", &self->brake, 1);
-    // write_field(outdir, "gear", &self->selected_gear, 1);
-    // write_field(outdir, "torque", &self->torque, 1);
+    float gear = (float)self->selected_gear;
+    printf("Gear %f\n", gear);
+    write_field(outdir, "gear", &gear, 1);
+    float torque = (float)self->present_motor_torque;
+    write_field(outdir, "torque", &torque, 1);
     write_field(outdir, "rpm", &self->engine_rpm, 1);
     write_field(outdir, "speed", &self->vehicle_speed, 1);
 }
@@ -24,6 +26,7 @@ int main(void)
 
     /* Create model */
     struct vehicle_info *yamaha_fjr_1300 = create_vehicle();
+    engage_clutch(yamaha_fjr_1300);
 
     SDL_Init(SDL_INIT_VIDEO);
 
@@ -38,8 +41,7 @@ int main(void)
     SDL_Renderer *ren = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED);
 
     /* Sliders */
-    Slider speed = { {100, 100, 600, 20}, 0, 300, 0, false };
-    Slider rpm   = { {100, 180, 600, 20}, 0, 9000, 0, false };
+    Slider throttle = { {100, 100, 600, 20}, 0, 1.0f, 0, false };
 
     int gear = 0; // 0=N, 1..6
 
@@ -64,26 +66,25 @@ int main(void)
                     running = false;
             }
 
-            handle_slider_event(&speed, &e);
-            handle_slider_event(&rpm, &e);
+            handle_slider_event(&throttle, &e);
         }
 
         /* HELD keys */
         const Uint8 *keys = SDL_GetKeyboardState(NULL);
         if (keys[SDL_SCANCODE_W])
-            rpm.value += 50;
+            throttle.value += 0.01f;
         if (keys[SDL_SCANCODE_SPACE])
-            speed.value += 1;
+            throttle.value -= 0.01f;
 
-        if (rpm.value > rpm.max) rpm.value = rpm.max;
-        if (speed.value > speed.max) speed.value = speed.max;
+        if (throttle.value > throttle.max) throttle.value = throttle.max;
+        if (throttle.value < throttle.min) throttle.value = throttle.min;
 
+        printf("throttle.value: %f\n", throttle.value);
         /* Render */
         SDL_SetRenderDrawColor(ren, 20, 20, 20, 255);
         SDL_RenderClear(ren);
 
-        draw_slider(ren, &speed);
-        draw_slider(ren, &rpm);
+        draw_slider(ren, &throttle);
 
         /* Gear indicator */
         SDL_Rect gear_box = {350, 260, 100, 60};
@@ -94,8 +95,7 @@ int main(void)
         SDL_RenderDrawRect(ren, &gear_box);
 
         /* Simple gear visualization (bars) */
-        for (int i = 0; i < 7; i++)
-        {
+        for (int i = 0; i < 7; i++) {
             SDL_Rect g = { 260 + i * 40, 350, 30, (i == gear) ? 40 : 20 };
             SDL_SetRenderDrawColor(ren,
                 i == gear ? 200 : 80,
@@ -106,6 +106,9 @@ int main(void)
             SDL_RenderFillRect(ren, &g);
         }
         
+        yamaha_fjr_1300->throttle = throttle.value;
+        set_gear(yamaha_fjr_1300, gear);
+        update_speed(yamaha_fjr_1300, 0.016f);
         update_view(outdir, yamaha_fjr_1300);
 
         SDL_RenderPresent(ren);

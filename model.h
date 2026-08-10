@@ -26,6 +26,7 @@ struct vehicle_info {
 
     float throttle; /* 0 -> 1 for 0% -> 100% of available torque */
     float brake;
+    float present_motor_torque;
 
     unsigned int clutch_engaged; /* Is the clutch engaged, 0 for disengaged and 1 for engaged */
 };

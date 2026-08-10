@@ -219,11 +219,15 @@ void update_speed_combined(struct vehicle_info *self, float deltatime)
     float wind_torque = get_vehicle_wind_force(self) / get_total_gear_ratio(self);
 
     /* Calculate total torque both motoring and braking */
-    float motor_torque = torque_at_rpm(self, self->engine_rpm) * self->throttle;
-    float total_torque = wind_torque + motor_torque + get_motor_drag_torque(self);
+    self->present_motor_torque = torque_at_rpm(self, self->engine_rpm) * self->throttle;
+    float total_torque = wind_torque + self->present_motor_torque + get_motor_drag_torque(self);
 
     /* Calculate new speed */
     self->engine_rpm += rads_to_rpm(calculate_acceleration(total_torque, total_mass, deltatime));
+    if (isfinite(self->engine_rpm) == 0) {
+        self->engine_rpm = self->idle;
+    }
+
     self->vehicle_speed = motor_side_rpm_to_kmh(self);
 }
 
@@ -236,6 +240,10 @@ void update_speed_separately(struct vehicle_info *self, float deltatime)
     float torque = torque_at_rpm(self, self->engine_rpm) * self->throttle;
     float mass = self->rotor_mass;
     self->engine_rpm += rads_to_rpm(calculate_acceleration(torque + get_motor_drag_torque(self), mass, deltatime));
+    
+    if (isfinite(self->engine_rpm) == 0) {
+        self->engine_rpm = self->idle;
+    }
     if (self->engine_rpm < self->idle) {
         self->engine_rpm = self->idle;
     }
