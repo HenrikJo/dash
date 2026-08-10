@@ -24,9 +24,11 @@ struct rpm_torque rpm_torque_yamaha_fjr_1300[] = {
     { .rpm = 9500, .torque = 0 }
 };
 
-float gear_ratio_yamaha_fjr_1300[] = { 2.5f, 1.722f, 1.35f, 1.111f, 0.962f, 0.846f };
+/* Index 0 is used for neutral */
+float gear_ratio_yamaha_fjr_1300[] = { 0.0f,  2.5f, 1.722f, 1.35f, 1.111f, 0.962f, 0.846f };
 
 struct vehicle_info {
+    /* Static info */
     unsigned int gears;
     float *gear_ratio;
 
@@ -77,6 +79,18 @@ float torque_at_rpm(struct vehicle_info *self, float rpm)
     return 0.0f;
 }
 
+float get_wheel_torque(struct vehicle_info *self, float rpm, unsigned int gear) 
+{
+    if (gear == 0 || gear > self->gears) {
+        /* Invalid gear or neutral selected, no torque */
+        return 0.0f;
+    }
+
+    float motor_torque = torque_at_rpm(self, rpm);
+
+    return motor_torque * self->gear_ratio[gear];
+}
+
 float rpm_to_rev(float rpm, unsigned int gear)
 {
     return 0.0f;
@@ -91,6 +105,9 @@ int main(void)
     yamaha_fjr_1300.speed_torque_values = sizeof(rpm_torque_yamaha_fjr_1300) / sizeof(rpm_torque_yamaha_fjr_1300[0]);
     yamaha_fjr_1300.torque_at_rpm = rpm_torque_yamaha_fjr_1300;
 
+    /* Wheel size 180/55ZR17 */
+    yamaha_fjr_1300.wheel_diameter = (17.0f * 25.4 + 55.0f) / 1000.0f;
+
     printf("Gears: %d\n", yamaha_fjr_1300.gears);
     for (int i = 0; i < yamaha_fjr_1300.gears; i++) {
         printf("Ratio at gear %d: %f\n", i+1, yamaha_fjr_1300.gear_ratio[i]);
@@ -98,7 +115,15 @@ int main(void)
 
     for (float rpm = 0.0f; rpm < 10000.0f; rpm += 100.0f) {
         float torque = torque_at_rpm(&yamaha_fjr_1300, rpm);
-        printf("Speed: %f rpm, torque: %f Nm\n", rpm, torque);
+        printf("Engine RPM: %f rpm, torque: %f Nm\n", rpm, torque);
+    }
+
+    /* Check wheel torque at peak torque rpm */
+    float rpm = 6500.0f;
+    for (unsigned int gear = 0; gear <= yamaha_fjr_1300.gears; gear++) {
+        float wheel_torque = get_wheel_torque(&yamaha_fjr_1300, rpm, gear);
+        float vehicle_motor_force = wheel_torque / yamaha_fjr_1300.wheel_diameter / 2.0f;
+        printf("Engine RPM: %f rpm, wheel torque: %f Nm, force: %fN\n", rpm, wheel_torque, vehicle_motor_force);
     }
 
 	return 0;
