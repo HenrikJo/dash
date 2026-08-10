@@ -2,6 +2,8 @@
 #include <math.h>
 #include <stdio.h>
 
+#define debug 1
+
 struct rpm_torque {
     float rpm;
     float torque;
@@ -53,17 +55,22 @@ float torque_at_rpm(struct vehicle_info *self, float rpm)
             float scale = actual / upper; /* How close is the value to the upper or lower value, use this to scale the torque */
 
             /* Make sure range of scale is 0 -> 1 */
-            assert(scale < 1.0f);
-            assert(scale > 0.0f);
+            assert(scale <= 1.0f);
+            assert(scale >= 0.0f);
             scale = fmin(1.0f, scale);
             scale = fmax(0.0f, scale);
 
-            float scaled_torque = prior_pnt->torque - rpm_tq_pnt->torque;
-
+            float scaled_torque = prior_pnt->torque * (1.0f - scale) + rpm_tq_pnt->torque * scale;
+            return scaled_torque;
         }
+        prior_pnt = rpm_tq_pnt;
+        rpm_tq_pnt++;
     }
 
-    /* Failed to find rpm within range, assume 0 Nm */
+    if (debug > 0) {
+        printf("Failed to find rpm within range, assume 0 Nm\n");
+    }
+
     return 0.0f;
 }
 
@@ -77,13 +84,17 @@ int main(void)
     struct vehicle_info yamaha_fjr_1300;
     yamaha_fjr_1300.gears = sizeof(gear_ratio_yamaha_fjr_1300) / sizeof(float);
     yamaha_fjr_1300.gear_ratio = gear_ratio_yamaha_fjr_1300;
+    yamaha_fjr_1300.torque_at_rpm = rpm_torque_yamaha_fjr_1300;
 
     printf("Gears: %d\n", yamaha_fjr_1300.gears);
     for (int i = 0; i < yamaha_fjr_1300.gears; i++) {
         printf("Ratio at gear %d: %f\n", i+1, yamaha_fjr_1300.gear_ratio[i]);
     }
 
-
+    for (float rpm = 0.0f; rpm < 10000.0f; rpm += 100.0f) {
+        float torque = torque_at_rpm(&yamaha_fjr_1300, rpm);
+        printf("Speed: %f rpm, torque: %f Nm\n", rpm, torque);
+    }
 
 	return 0;
 }
