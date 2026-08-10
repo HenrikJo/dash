@@ -231,10 +231,15 @@ void update_speed_combined(struct vehicle_info *self, float deltatime)
 
     /* Calculate wind resistance torque */
     float wind_torque = get_vehicle_wind_force(self) / get_total_gear_ratio(self);
+    float wheel_brake_torque = -fabsf(self->brake_torque_no_throttle * (1.0f - self->throttle));
+    float min_speed = 10.0f;
+    if (self->vehicle_speed < min_speed) {
+        wheel_brake_torque = wheel_brake_torque * (1.0f - (min_speed / self->vehicle_speed));
+    }
 
     /* Calculate total torque both motoring and braking */
     self->present_motor_torque = torque_at_rpm(self, self->engine_rpm) * self->throttle;
-    float total_torque = wind_torque + self->present_motor_torque + get_motor_drag_torque(self);
+    float total_torque = wheel_brake_torque + wind_torque + self->present_motor_torque + get_motor_drag_torque(self);
 
     /* Calculate new speed */
     self->engine_rpm += rads_to_rpm(calculate_acceleration(total_torque, total_mass, deltatime));
@@ -295,6 +300,8 @@ struct vehicle_info *create_vehicle(void)
     yamaha_fjr_1300->speed_torque_values = sizeof(rpm_torque_yamaha_fjr_1300) / sizeof(rpm_torque_yamaha_fjr_1300[0]);
     yamaha_fjr_1300->torque_at_rpm = rpm_torque_yamaha_fjr_1300;
 
+    yamaha_fjr_1300->brake_torque_no_throttle = 20.0f;
+
     yamaha_fjr_1300->rotor_mass = 1.0f;
     yamaha_fjr_1300->rotor_radius = 0.1f;
     yamaha_fjr_1300->rotor_drag_torque = -1.0f;
@@ -307,7 +314,7 @@ struct vehicle_info *create_vehicle(void)
     yamaha_fjr_1300->selected_gear = 1;
 
     /* Wheel size 180/55ZR17 */
-    yamaha_fjr_1300->wheel_diameter = (17.0f * 25.4 + 55.0f) / 1000.0f;
+    yamaha_fjr_1300->wheel_diameter = (17.0f * 25.4f + 55.0f) / 1000.0f;
     yamaha_fjr_1300->body_mass = 250.0f;
 
     return yamaha_fjr_1300;
