@@ -10,6 +10,10 @@
 #define SERVO1_GPIO 4
 #define SERVO2_GPIO 5
 
+#define LED_RED 15
+#define LED_GREEN 14
+#define LED_BLUE 13
+
 #define BTN_UP_GPIO       12
 #define BTN_DOWN_GPIO     11
 #define BTN_INC_GPIO      10
@@ -68,6 +72,25 @@ static void servo_init(void)
     ESP_ERROR_CHECK(ledc_channel_config(&servo2));
 }
 
+static void leds_init(void)
+{
+    gpio_config_t io_conf = {
+        .pin_bit_mask = (1ULL << LED_RED) |
+                        (1ULL << LED_GREEN) |
+                        (1ULL << LED_BLUE),
+        .mode = GPIO_MODE_OUTPUT,
+        .pull_up_en = GPIO_PULLUP_DISABLE,
+        .pull_down_en = GPIO_PULLDOWN_DISABLE,
+        .intr_type = GPIO_INTR_DISABLE
+    };
+    return;
+    ESP_ERROR_CHECK(gpio_config(&io_conf));
+   return;
+    gpio_set_level(LED_RED, 1);
+    gpio_set_level(LED_GREEN, 1);
+    gpio_set_level(LED_BLUE, 1);
+}
+
 static void buttons_init(void)
 {
     gpio_config_t io_conf = {
@@ -80,6 +103,50 @@ static void buttons_init(void)
         .intr_type = GPIO_INTR_DISABLE
     };
     ESP_ERROR_CHECK(gpio_config(&io_conf));
+}
+
+void update_gear_leds(int gear)
+{
+    printf("gear: %d ", gear);
+    return;
+    switch (gear)
+    {
+    case 0:
+        gpio_set_level(LED_RED, 1);
+        gpio_set_level(LED_GREEN, 0);
+        gpio_set_level(LED_BLUE, 0);
+        break;
+    case 1:
+     gpio_set_level(LED_RED, 0);
+     gpio_set_level(LED_GREEN, 1);
+     gpio_set_level(LED_BLUE, 0);
+     break;
+    case 2:
+        gpio_set_level(LED_RED, 1);
+        gpio_set_level(LED_GREEN, 1);
+        gpio_set_level(LED_BLUE, 0);
+        break;
+    case 3:
+        gpio_set_level(LED_RED, 0);
+        gpio_set_level(LED_GREEN, 0);
+        gpio_set_level(LED_BLUE, 1);
+        break;
+    case 4:
+        gpio_set_level(LED_RED, 1);
+        gpio_set_level(LED_GREEN, 0);
+        gpio_set_level(LED_BLUE, 1);
+        break;
+    case 5:
+        gpio_set_level(LED_RED, 0);
+        gpio_set_level(LED_GREEN, 1);
+        gpio_set_level(LED_BLUE, 1);
+        break;
+    case 6:
+        gpio_set_level(LED_RED, 1);
+        gpio_set_level(LED_GREEN, 1);
+        gpio_set_level(LED_BLUE, 1);
+        break;
+    }
 }
 
 static void update_view(struct vehicle_info *self)
@@ -104,6 +171,7 @@ static void update_view(struct vehicle_info *self)
 void app_main(void)
 {
     buttons_init();
+    leds_init();
     servo_init();
 
     /* Create model */
@@ -146,6 +214,7 @@ void app_main(void)
         set_gear(yamaha_fjr_1300, gear);
         update_speed(yamaha_fjr_1300, 0.016f);
         printf("gear: %d ", gear);
+        update_gear_leds(gear);
         update_view(yamaha_fjr_1300);
     }
 }
