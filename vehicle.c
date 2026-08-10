@@ -269,10 +269,17 @@ struct vehicle_info *create_vehicle(void)
     return yamaha_fjr_1300;
 }
 
+unsigned int set_gear(struct vehicle_info *self, unsigned int gear)
+{
+    if (gear <= self->gears) {
+        self->selected_gear = gear;
+    }
+    return self->selected_gear;
+}
+
 int main(void)
 {
     struct vehicle_info *yamaha_fjr_1300 = create_vehicle();
-
 
     printf("Gears: %d\n", yamaha_fjr_1300->gears);
     for (int i = 0; i < yamaha_fjr_1300->gears; i++) {

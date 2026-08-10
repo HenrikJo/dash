@@ -29,3 +29,6 @@ struct vehicle_info {
 
     unsigned int clutch_engaged; /* Is the clutch engaged, 0 for disengaged and 1 for engaged */
 };
+
+struct vehicle_info *create_vehicle(void);
+unsigned int set_gear(struct vehicle_info *self, unsigned int gear);
