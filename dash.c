@@ -152,6 +152,10 @@ float kmh_to_motor_side_rpm(struct vehicle_info *self)
     return wheel_rpm * gear_ratio;
 }
 
+float motor_side_rpm_to_kmh(struct vehicle_info *self) {
+    /* Todo here continue */
+}
+
 float calc_moment_of_inertia(float mass, float radius)
 {
     return mass * radius * radius / 2.0f;
@@ -160,6 +164,11 @@ float calc_moment_of_inertia(float mass, float radius)
 float calc_kinetic_energy(float mass, float velocity)
 {
     return mass * velocity * velocity / 2.0f;
+}
+
+float calc_mass(float kinetic_energy, float velocity)
+{
+    return kinetic_energy * 2.0f / (velocity * velocity);
 }
 
 float calculate_velocity(float kinetic_energy, float mass)
@@ -180,6 +189,13 @@ void calc_engaged_clutch_speeds(struct vehicle_info *self)
 
     float vehicle_motor_rpm = kmh_to_motor_side_rpm(self);
     printf("vehicle_motor_rpm: %f\n", vehicle_motor_rpm);
+    float vehicle_weight_motor_side = calc_mass(vehicle_energy, rpm_to_rads(vehicle_motor_rpm));
+
+    float combined_velocity = rads_to_rpm(calculate_velocity(vehicle_energy + rotor_energy, vehicle_weight_motor_side + moment_of_inertia));
+    printf("combined_velocity: %f\n", combined_velocity);
+
+    self->engine_rpm = combined_velocity;
+    self->vehicle_speed = motor_side_rpm_to_kmh(self);
 }
 
 /**
