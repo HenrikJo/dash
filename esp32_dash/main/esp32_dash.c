@@ -10,7 +10,7 @@
 #define SERVO1_GPIO 4
 #define SERVO2_GPIO 5
 
-#define LED_RED 15
+#define LED_RED 22
 #define LED_GREEN 14
 #define LED_BLUE 13
 
@@ -83,9 +83,7 @@ static void leds_init(void)
         .pull_down_en = GPIO_PULLDOWN_DISABLE,
         .intr_type = GPIO_INTR_DISABLE
     };
-    return;
     ESP_ERROR_CHECK(gpio_config(&io_conf));
-   return;
     gpio_set_level(LED_RED, 1);
     gpio_set_level(LED_GREEN, 1);
     gpio_set_level(LED_BLUE, 1);
@@ -108,7 +106,6 @@ static void buttons_init(void)
 void update_gear_leds(int gear)
 {
     printf("gear: %d ", gear);
-    return;
     switch (gear)
     {
     case 0:
