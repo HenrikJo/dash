@@ -1,6 +1,13 @@
 model.o:model.c
 	gcc -c model.c -lm -o model.o -Wall -Werror
 
+view.o: view.c
+	gcc view.c -o view.o -Wall -Werror
+
+run_view: view.o
+	./view.o
+	ls trace
+
 main:main.c model.o
 	gcc main.c model.o -lm -Wall -Werror -o main
 
