@@ -180,8 +180,8 @@ float wind_force(float air_density, float velocity, float drag_coefficient, floa
 
 float get_vehicle_wind_force(struct vehicle_info *self) 
 {
-    float drag_coefficient = 0.29f;
-    float area = 1.5f;
+    float drag_coefficient = 0.5f;
+    float area = 0.5f;
     float air_density = 1.225f;
     return wind_force(air_density, kmh_to_ms(self->vehicle_speed), drag_coefficient, area);
 }
