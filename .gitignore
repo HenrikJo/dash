@@ -6,3 +6,4 @@ secrets.yaml
 trace/*
 venv/*
 kst*
+esp32_dash/build/*
