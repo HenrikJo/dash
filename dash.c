@@ -1,3 +1,4 @@
+#include <assert.h>
 #include <math.h>
 #include <stdio.h>
 
@@ -52,6 +53,8 @@ float torque_at_rpm(struct vehicle_info *self, float rpm)
             float scale = actual / upper; /* How close is the value to the upper or lower value, use this to scale the torque */
 
             /* Make sure range of scale is 0 -> 1 */
+            assert(scale < 1.0f);
+            assert(scale > 0.0f);
             scale = fmin(1.0f, scale);
             scale = fmax(0.0f, scale);
 
