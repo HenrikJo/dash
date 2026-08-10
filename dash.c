@@ -38,6 +38,15 @@ struct vehicle_info {
     float wheel_diameter;
     float rotor_mass;
     float body_mass;
+
+    float wind_coefficient;
+
+    /* Dynamic state */
+    float engine_rpm;
+    float vehicle_speed;
+
+    float throttle;
+    float brake;
 };
 
 float torque_at_rpm(struct vehicle_info *self, float rpm)
