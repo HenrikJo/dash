@@ -143,6 +143,7 @@ void app_main(void)
         yamaha_fjr_1300->throttle = throttle.value;
         set_gear(yamaha_fjr_1300, gear);
         update_speed(yamaha_fjr_1300, 0.016f);
+        printf("gear: %d ", gear);
         update_view(yamaha_fjr_1300);
     }
 }
