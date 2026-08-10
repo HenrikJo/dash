@@ -1,0 +1,64 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36" version="29.2.9">
+  <diagram name="Sida-1" id="-Lu4xss-zTKCt7JBo7BQ">
+    <mxGraphModel dx="872" dy="456" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="sf9OFp1RNFtd8MrRFGMu-17" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="" vertex="1">
+          <mxGeometry height="280" width="210" x="410" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="sf9OFp1RNFtd8MrRFGMu-4" edge="1" parent="1" source="sf9OFp1RNFtd8MrRFGMu-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="sf9OFp1RNFtd8MrRFGMu-2">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="sf9OFp1RNFtd8MrRFGMu-5" edge="1" parent="1" source="sf9OFp1RNFtd8MrRFGMu-1" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="sf9OFp1RNFtd8MrRFGMu-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="sf9OFp1RNFtd8MrRFGMu-1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Clutch engaged?" vertex="1">
+          <mxGeometry height="60" width="120" x="280" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="sf9OFp1RNFtd8MrRFGMu-11" edge="1" parent="1" source="sf9OFp1RNFtd8MrRFGMu-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" target="sf9OFp1RNFtd8MrRFGMu-10">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="sf9OFp1RNFtd8MrRFGMu-13" edge="1" parent="1" source="sf9OFp1RNFtd8MrRFGMu-2" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" target="sf9OFp1RNFtd8MrRFGMu-12">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="sf9OFp1RNFtd8MrRFGMu-2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Clutch engaged prior?" vertex="1">
+          <mxGeometry height="60" width="120" x="120" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="sf9OFp1RNFtd8MrRFGMu-7" edge="1" parent="1" source="sf9OFp1RNFtd8MrRFGMu-3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="sf9OFp1RNFtd8MrRFGMu-6">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="sf9OFp1RNFtd8MrRFGMu-3" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Calculate motor speed" vertex="1">
+          <mxGeometry height="60" width="120" x="440" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="sf9OFp1RNFtd8MrRFGMu-6" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Calculate vehicle speed" vertex="1">
+          <mxGeometry height="60" width="120" x="440" y="270" as="geometry" />
+        </mxCell>
+        <mxCell id="sf9OFp1RNFtd8MrRFGMu-8" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="No" vertex="1">
+          <mxGeometry height="30" width="60" x="430" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="sf9OFp1RNFtd8MrRFGMu-9" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Yes" vertex="1">
+          <mxGeometry height="30" width="60" x="190" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="sf9OFp1RNFtd8MrRFGMu-14" edge="1" parent="1" source="sf9OFp1RNFtd8MrRFGMu-10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;" target="sf9OFp1RNFtd8MrRFGMu-12">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="sf9OFp1RNFtd8MrRFGMu-10" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Calculate combined speeds" vertex="1">
+          <mxGeometry height="60" width="120" x="120" y="270" as="geometry" />
+        </mxCell>
+        <mxCell id="sf9OFp1RNFtd8MrRFGMu-12" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Calculate updated speeds with present torques" vertex="1">
+          <mxGeometry height="60" width="120" x="270" y="370" as="geometry" />
+        </mxCell>
+        <mxCell id="sf9OFp1RNFtd8MrRFGMu-15" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="No" vertex="1">
+          <mxGeometry height="30" width="60" x="190" y="230" as="geometry" />
+        </mxCell>
+        <mxCell id="sf9OFp1RNFtd8MrRFGMu-16" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Yes" vertex="1">
+          <mxGeometry height="30" width="60" x="260" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="sf9OFp1RNFtd8MrRFGMu-18" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="Separate calculation function" vertex="1">
+          <mxGeometry height="30" width="60" x="550" y="120" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
