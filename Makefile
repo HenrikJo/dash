@@ -4,8 +4,14 @@ model.o:model.c
 main:main.c model.o
 	gcc main.c model.o -lm -Wall -Werror -o main
 
+test:test.c model.o
+	gcc test.c model.o -lm -Wall -Werror -o test
+
 run_main:main
 	./main
+
+run_test:test
+	./test
 
 control.o: control.c
 	gcc control.c -lSDL2 -O2 -o control.o
